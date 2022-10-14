@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial &mdash; Wi4MPI  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/logo-square-blue.svg"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developer Guide" href="developer_guide.html" />
+    <link rel="prev" title="User Guide" href="user_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/logo-full-white.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running">Running</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#from-mpich-to-open-mpi">From MPICH to Open MPI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compiling-osu-mb-with-mpich">Compiling OSU-MB with MPICH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-osu-mb-with-mpich">Running OSU-MB with MPICH</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-osu-mb-with-open-mpi-from-mpich">Running OSU-MB with Open MPI from MPICH</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#from-open-mpi-to-mpich">From Open MPI to MPICH</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#compiling-osu-mb-with-open-mpi">Compiling OSU-MB with Open MPI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-osu-mb-with-open-mpi">Running OSU-MB with Open MPI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-osu-mb-with-mpich-from-open-mpi">Running OSU-MB with MPICH from Open MPI</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generator_guide.html">Generator Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Wi4MPI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tutorial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">¶</a></h1>
+<p>During this tutorial, you just have to copy/paste boxed lines in a <cite>bash</cite> terminal.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<p>Install wi4mpi with Spack PM</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://github.com/spack/spack</span>
+<span class="go">source spack/share/spack/setup-env.sh</span>
+<span class="go">spack compiler find    # /!\ gfortran is required for this tuto (openmpi dep)</span>
+<span class="go">spack install wi4mpi</span>
+<span class="go">spack install mpich</span>
+<span class="go">spack install openmpi</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Here, we load mpich and openmpi before wi4mpi in order to detect their root path via dirname</p>
+</div>
+<p>Add MPICH path to wi4mpi config file</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">spack load wi4mpi</span>
+<span class="go">spack load mpich</span>
+<span class="go">echo &quot;MPICH_DEFAULT_ROOT=\&quot;$(dirname $(dirname $(which mpirun)))\&quot;&quot; &gt;&gt; $WI4MPI_ROOT/etc/wi4mpi.cfg</span>
+</pre></div>
+</div>
+<p>Add Open MPI path to wi4mpi config file</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">spack load wi4mpi</span>
+<span class="go">spack load openmpi</span>
+<span class="go">dirname $(dirname $(which mpirun))</span>
+<span class="go">echo &quot;OPENMPI_DEFAULT_ROOT=\&quot;$(dirname $(dirname $(which mpirun)))\&quot;&quot; &gt;&gt; $WI4MPI_ROOT/etc/wi4mpi.cfg</span>
+</pre></div>
+</div>
+</section>
+<section id="running">
+<h2>Running<a class="headerlink" href="#running" title="Permalink to this heading">¶</a></h2>
+<p>Run codes linked with Open MPI through Wi4MPI to run on MPICH runtime and vice versa.</p>
+<section id="from-mpich-to-open-mpi">
+<h3>From MPICH to Open MPI<a class="headerlink" href="#from-mpich-to-open-mpi" title="Permalink to this heading">¶</a></h3>
+<section id="compiling-osu-mb-with-mpich">
+<h4>Compiling OSU-MB with MPICH<a class="headerlink" href="#compiling-osu-mb-with-mpich" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">wget https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.9.tar.gz</span>
+<span class="go">tar xf osu-micro-benchmarks-5.9.tar.gz</span>
+<span class="go">spack load mpich</span>
+<span class="go">cd osu-micro-benchmarks-5.9</span>
+<span class="go">./configure CC=mpicc CXX=mpicxx</span>
+<span class="go">make -j</span>
+</pre></div>
+</div>
+</section>
+<section id="running-osu-mb-with-mpich">
+<h4>Running OSU-MB with MPICH<a class="headerlink" href="#running-osu-mb-with-mpich" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">spack load mpich</span>
+<span class="go">mpirun -n 4 mpi/collective/osu_allreduce</span>
+</pre></div>
+</div>
+</section>
+<section id="running-osu-mb-with-open-mpi-from-mpich">
+<h4>Running OSU-MB with Open MPI from MPICH<a class="headerlink" href="#running-osu-mb-with-open-mpi-from-mpich" title="Permalink to this heading">¶</a></h4>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Load wi4mpi after openmpi to get mpirun PATH priority</p>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">spack load openmpi</span>
+<span class="go">spack load wi4mpi</span>
+<span class="go">mpirun -F mpich -T openmpi -n 4 mpi/collective/osu_allreduce</span>
+</pre></div>
+</div>
+<p>If everything work fine, you should get someting like this:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You are using Wi4MPI-3.6.0 with the mode preload From <strong>MPICH</strong> To <strong>OMPI</strong></p>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">You are using Wi4MPI-3.6.0 with the mode preload From MPICH To OMPI</span>
+
+<span class="gp"># </span>OSU MPI Allreduce Latency Test v5.9
+<span class="gp"># </span>Size       Avg Latency<span class="o">(</span>us<span class="o">)</span>
+<span class="go">4                       0.93</span>
+<span class="go">8                       0.93</span>
+<span class="go">16                      0.94</span>
+<span class="go">32                      0.94</span>
+<span class="go">64                      0.94</span>
+<span class="go">128                     1.06</span>
+<span class="go">256                     1.10</span>
+<span class="go">512                     1.69</span>
+<span class="go">1024                    1.91</span>
+<span class="go">2048                    2.47</span>
+<span class="go">4096                    5.24</span>
+<span class="go">8192                    7.92</span>
+<span class="go">16384                  13.77</span>
+<span class="go">32768                  18.52</span>
+<span class="go">65536                  29.44</span>
+<span class="go">131072                 56.47</span>
+<span class="go">262144                116.91</span>
+<span class="go">524288                318.04</span>
+<span class="go">1048576              1465.73</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="from-open-mpi-to-mpich">
+<h3>From Open MPI to MPICH<a class="headerlink" href="#from-open-mpi-to-mpich" title="Permalink to this heading">¶</a></h3>
+<section id="compiling-osu-mb-with-open-mpi">
+<h4>Compiling OSU-MB with Open MPI<a class="headerlink" href="#compiling-osu-mb-with-open-mpi" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">wget https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.9.tar.gz</span>
+<span class="go">tar xf osu-micro-benchmarks-5.9.tar.gz</span>
+<span class="go">spack load openmpi</span>
+<span class="go">cd osu-micro-benchmarks-5.9</span>
+<span class="go">./configure CC=mpicc CXX=mpicxx</span>
+<span class="go">make -j</span>
+</pre></div>
+</div>
+</section>
+<section id="running-osu-mb-with-open-mpi">
+<h4>Running OSU-MB with Open MPI<a class="headerlink" href="#running-osu-mb-with-open-mpi" title="Permalink to this heading">¶</a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">spack load openmpi</span>
+<span class="go">mpirun -n 4 mpi/collective/osu_allreduce</span>
+</pre></div>
+</div>
+</section>
+<section id="running-osu-mb-with-mpich-from-open-mpi">
+<h4>Running OSU-MB with MPICH from Open MPI<a class="headerlink" href="#running-osu-mb-with-mpich-from-open-mpi" title="Permalink to this heading">¶</a></h4>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Load wi4mpi after mpich to get mpirun PATH priority</p>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">spack unload -a</span>
+<span class="go">spack load mpich</span>
+<span class="go">spack load wi4mpi</span>
+<span class="go">mpirun -F openmpi -T mpich -n 4 mpi/collective/osu_allreduce</span>
+</pre></div>
+</div>
+<p>If everything work fine, you should get someting like this:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You are using Wi4MPI-3.6.0 with the mode preload From <strong>OMPI</strong> To <strong>MPICH</strong></p>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">You are using Wi4MPI-3.6.0 with the mode preload From OMPI To MPICH</span>
+
+<span class="gp"># </span>OSU MPI Allreduce Latency Test v5.9
+<span class="gp"># </span>Size       Avg Latency<span class="o">(</span>us<span class="o">)</span>
+<span class="go">4                       1.23</span>
+<span class="go">8                       1.21</span>
+<span class="go">16                      1.26</span>
+<span class="go">32                      1.22</span>
+<span class="go">64                      1.24</span>
+<span class="go">128                     1.39</span>
+<span class="go">256                     1.41</span>
+<span class="go">512                     1.82</span>
+<span class="go">1024                    1.78</span>
+<span class="go">2048                    2.23</span>
+<span class="go">4096                    3.40</span>
+<span class="go">8192                    6.67</span>
+<span class="go">16384                  11.69</span>
+<span class="go">32768                  23.53</span>
+<span class="go">65536                  42.82</span>
+<span class="go">131072                 90.53</span>
+<span class="go">262144                184.57</span>
+<span class="go">524288                387.81</span>
+<span class="go">1048576               957.58</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="user_guide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="developer_guide.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016-2022, CEA - Commissariat de l&#39;Énerge Atomique.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

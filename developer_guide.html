@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Guide &mdash; Wi4MPI  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/logo-square-blue.svg"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Generator Guide" href="generator_guide.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/logo-full-white.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#library">Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-it-works">How it works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#library-settings">Library settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#symbol-overload">Symbol overload</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#code-chooser-asm">Code chooser ASM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#a-mpi-function">A_MPI_Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r-mpi-function">R_MPI_Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hash-table">Hash table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#thread-safety">Thread safety</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#interface">Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#static-mode">Static mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#get-involved-in-wi4mpi">Get involved in WI4MPI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#expand-mpi-cover-of-wi4mpi">Expand MPI cover of WI4MPI</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#on-the-generator-side">On the generator side</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#on-the-library-side">On the library side</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#expand-wi4mpi-conversion-capability">Expand WI4MPI conversion capability</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generator_guide.html">Generator Guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Wi4MPI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Developer Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/developer_guide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Permalink to this heading">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<p>MPI is a standard in HPC community which allows a simple use of
+clusters. Nowoaday, there are several implementation (OpenMPI, BullxMPI,
+MPT, IntelMPI, MPC, …) each of which involves a specific ABI
+(Application Binary Interface) for an application compiled with a
+specific MPI implementation. With wi4mpi, an application compiled with
+an alpha MPI implementation can be run under a beta MPI implementation
+without any compilation protocol and any concern about the ABI (Preload
+version). WI4MPI can also be seen as a dedicated MPI implementation;
+This time, the application is compiled against the wi4mpi library
+(libmpi.so) whith the dedicated wrapper (mpicc,mpif90…) meant for that
+purpose, and can be run under any other MPI implementation (Interface
+Version).</p>
+</section>
+<section id="library">
+<h2>Library<a class="headerlink" href="#library" title="Permalink to this heading">¶</a></h2>
+<section id="how-it-works">
+<h3>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading">¶</a></h3>
+<p>Before performing any translation we need to distinguish the application
+side from the runtime side. To do that, any MPI object from the
+application side are prefixed by A_ and those from the application are
+prefixed by R_. To perform a translation, all original MPI call from
+the application is intercepted by WI4MPI and remplaced by the same call
+prefixed by A_. For example, with an OpenMPI —&gt; IntelMPI conversion.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Application</span><span class="p">:</span> <span class="n">MPI_Init</span> <span class="p">(</span><span class="n">OpenMPI</span><span class="p">)</span>                         <span class="n">MPI_Init</span> <span class="p">(</span><span class="n">IntelMPI</span><span class="p">)</span>
+                              \                         <span class="o">/</span>
+                      <span class="n">Phase</span> <span class="mi">1</span>  \                       <span class="o">/</span>  <span class="n">Phase</span> <span class="mi">3</span>
+                                \                     <span class="o">/</span>
+                                <span class="o">|--------------------|</span>
+                                <span class="o">|</span> <span class="n">WI4MPI</span><span class="p">:</span> <span class="n">A_MPI_Init</span> <span class="o">|</span>
+                                <span class="o">|--------------------|</span>
+                                          <span class="o">|</span>
+                                          <span class="o">|</span> <span class="n">Phase</span> <span class="mi">2</span>
+                                          <span class="o">|</span>
+                                      <span class="n">Translation</span>
+</pre></div>
+</div>
+</section>
+<section id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h3>
+<section id="library-settings">
+<h4>Library settings<a class="headerlink" href="#library-settings" title="Permalink to this heading">¶</a></h4>
+<p>The library is set during its loading time, when the program start. All
+runtime MPI routines are saved in function pointer via dlsym call to
+make phase 3 possible, all the table are created and set with MPI
+constant object, and the spinlocks are initialized. To do so, we used
+the following syntax:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="o">**</span><span class="n">attribute</span><span class="o">**</span><span class="w"> </span><span class="p">((</span><span class="n">constructor</span><span class="p">))</span><span class="w"> </span><span class="n">wrapper_init</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="n">lib_handle</span><span class="o">=</span><span class="n">dlopen</span><span class="p">(</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;WI4MPI_RUN_MPI_C_LIB&quot;</span><span class="p">),</span><span class="n">RTLD_NOW</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">LOCAL_MPI_Function</span><span class="o">=</span><span class="n">dlsym</span><span class="p">(</span><span class="n">lib_handle</span><span class="p">,</span><span class="s">&quot;PMPI_Function&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">....</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The library contain three constructor:</p>
+<ul class="simple">
+<li><p>wrapper_init dans test_generation_wrapper.c (API C) (preload and
+interface)</p></li>
+<li><p>wrapper_init_f dans wrapper.c (API Fortran) (preload and interface)</p></li>
+<li><p>wrapper_init_c2ff2c dans c2f_f2c.c (API c2f/f2c)</p></li>
+</ul>
+</section>
+<section id="symbol-overload">
+<h4>Symbol overload<a class="headerlink" href="#symbol-overload" title="Permalink to this heading">¶</a></h4>
+<p>The mpi called are intercept thanks to the following rerouting:</p>
+<ul class="simple">
+<li><p>#define A_MPI_Send PMPI_Send</p></li>
+<li><p>#pragma weak MPI_Send=PMPI_Send</p></li>
+</ul>
+<p>(See interface_test.c in src/interface/gen/interface_test.c and
+src/interface/gen/interface_fort.c) This syntax is also present but
+hidden in test_generation_wrapper.c (src/{preload,interface}/gen/)
+whithin an asm code chooser for the next reason.</p>
+<p>The MPI-IO implémentation (ROMIO) present within the most MPI
+implementation trigger some call to the MPI user interface that WI4MPI
+intercept thanks to its symbols overload protocol. It means that during
+the runtime (phase 3 above), some MPI calls are made, forcing WI4MPI to
+intercept them and so making the application to crash. The crash is die
+to the fact that WI4MPI MPI is trying to convert runtime argument to
+runtime version.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Application</span><span class="p">:</span><span class="n">MPI_File_open</span> <span class="p">(</span><span class="n">OpenMPI</span><span class="p">)</span>                           <span class="n">MPI_File_open</span><span class="p">(</span><span class="n">IntelMPI</span><span class="p">)</span>
+                             \                               <span class="o">/</span>                      \
+              <span class="n">Phase</span> <span class="mi">1</span>         \                             <span class="o">/</span>         <span class="n">Phase</span> <span class="mi">3</span>        \
+                               \                           <span class="o">/</span>                          \
+                                <span class="o">|-------------------------|</span>                      <span class="o">|----------------------------------------------------|</span>
+                                <span class="o">|</span> <span class="n">WI4MPI</span><span class="p">:</span> <span class="n">A_MPI_File_open</span> <span class="o">|</span>                      <span class="o">|</span> <span class="n">WI4MPI</span><span class="p">:</span> <span class="n">A_MPI_Allreduce</span> <span class="n">but</span> <span class="k">with</span> <span class="n">runtime</span> <span class="n">arguments</span> <span class="o">|</span>
+                                <span class="o">|-------------------------|</span>                      <span class="o">|</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">application</span> <span class="n">arguments</span> <span class="p">(</span><span class="n">R_</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">A_</span><span class="p">)</span><span class="o">|</span>
+                                            <span class="o">|</span>                                    <span class="o">|----------------------------------------------------|</span>
+                                            <span class="o">|</span>   <span class="n">Phase</span> <span class="mi">2</span>                                                     <span class="o">|</span>
+                                            <span class="o">|</span>                                                               <span class="o">|</span>
+                                       <span class="n">Translation</span>                                                     <span class="n">Translation</span> <span class="o">----&gt;</span> <span class="n">Crash</span>
+</pre></div>
+</div>
+<p>To overcome this issue, we used an ASM code chooser.</p>
+</section>
+<section id="code-chooser-asm">
+<h4>Code chooser ASM<a class="headerlink" href="#code-chooser-asm" title="Permalink to this heading">¶</a></h4>
+<p>The ASM code chooser does the simple following things:</p>
+<p>If we alreday are in the wrapper:</p>
+<ul class="simple">
+<li><p>The arguments are passed without any translation protocol to the
+underlying MPI runtime call (LOCAL_MPI_function)</p></li>
+</ul>
+<p>Otherwise:</p>
+<ul class="simple">
+<li><p>The arguments are translated and passed to the underlying MPI runtime
+call (LOCAL_MPI_function)</p></li>
+</ul>
+<p>To know which state the process is, we defined the in_w variable:</p>
+<ul class="simple">
+<li><p>in_w=1 : in the wrapper</p></li>
+<li><p>in_w=0 : in the application</p></li>
+</ul>
+<p>Since the implementation of MPI objects are developer dependent, some of
+these may have different size among the different one. To make sure that
+there is no side effect, the code chooser analyze the stack itself.</p>
+<p>ASM Code chooser implementation (generated for each function):</p>
+<ul class="simple">
+<li><p>.global PMPI_Function</p></li>
+<li><p>.weak MPI_Function</p></li>
+<li><p>.set MPI_function,PMPI_Function</p></li>
+<li><p>.extern in_w</p></li>
+<li><p>.extern A_MPI_Function</p></li>
+<li><p>.extern R_MPI_Function</p></li>
+<li><p>.type PMPI_Function,&#64;function</p></li>
+<li><p>.text</p></li>
+<li><p>PMPI_Function:</p></li>
+<li><p>push %rbp</p></li>
+<li><p>mov %rsp, %rbp</p></li>
+<li><p>sub $0x20, %rsp</p></li>
+<li><p>mov %rdi, -0x8(%rbp)</p></li>
+<li><p>mov %rsi, -0x10(%rbp)</p></li>
+<li><p>mov %rdx, -0x18(%rbp)</p></li>
+<li><p>mov %rcx, -0x20(%rbp)</p></li>
+<li><p>.byte 0x66</p></li>
+<li><p>leaq in_w&#64;tlsgd(%rip), %rdi</p></li>
+<li><p>.value 0x6666</p></li>
+<li><p>rex64</p></li>
+<li><p>call <a class="reference external" href="mailto:__tls_get_addr&#37;&#52;&#48;PLT">__tls_get_addr<span>&#64;</span>PLT</a></p></li>
+<li><p>mov -0x8(%rbp), %rdi</p></li>
+<li><p>mov -0x10(%rbp), %rsi</p></li>
+<li><p>mov -0x18(%rbp), %rdx</p></li>
+<li><p>mov -0x20(%rbp), %rcx</p></li>
+<li><p>leave</p></li>
+<li><p>cmpl $0x0, 0x0(%rax)</p></li>
+<li><p>jne inwrap_MPI_Function</p></li>
+<li><p>jmp (*)A_MPI_Function&#64;GOTPCREL(%rip)</p></li>
+<li><p>inwrap_MPI_Function:</p></li>
+<li><p>jmp (*)R_MPI_Function&#64;GOTPCREL(%rip)</p></li>
+<li><p>.size PMPI_Function,.-PMPI_Function</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Application</span><span class="p">:</span><span class="n">MPI_File_open</span> <span class="p">(</span><span class="n">OpenMPI</span><span class="p">)</span>                           <span class="n">MPI_File_open</span><span class="p">(</span><span class="n">IntelMPI</span><span class="p">)</span>
+                             \                               <span class="o">/</span>                      \
+              <span class="n">Phase</span> <span class="mi">1</span>         \                             <span class="o">/</span>         <span class="n">Phase</span> <span class="mi">3</span>        \
+                               \                           <span class="o">/</span>                          \
+                                <span class="o">|-------------------------|</span>                     <span class="o">|-------------------------|</span>
+                                <span class="o">|</span> <span class="n">WI4MPI</span><span class="p">:</span> <span class="n">PMPI_File_open</span>  <span class="o">|</span>                     <span class="o">|</span> <span class="n">WI4MPI</span><span class="p">:</span> <span class="n">PMPI_Allreduce</span>  <span class="o">|</span>
+                                <span class="o">|</span> <span class="n">Testing</span> <span class="n">in_w</span><span class="p">:</span> <span class="n">in_w</span><span class="o">=</span><span class="mi">0</span>    <span class="o">|</span>                     <span class="o">|</span> <span class="n">Testing</span> <span class="n">in_w</span><span class="p">:</span> <span class="n">in_w</span><span class="o">=</span><span class="mi">1</span>    <span class="o">|</span>
+                                <span class="o">|-------------------------|</span>                     <span class="o">|</span> <span class="o">------------------------|</span>
+                                           <span class="o">|</span>    <span class="n">Phase</span> <span class="mi">2</span>                                      <span class="o">|</span>
+                                           <span class="o">|</span>                                                 <span class="o">|</span>
+                                <span class="n">A_MPI_File_open</span><span class="p">:</span><span class="n">Translation</span>                     <span class="n">R_MPI_Allreduce</span><span class="p">:</span><span class="n">No</span> <span class="n">Translation</span>
+</pre></div>
+</div>
+</section>
+<section id="a-mpi-function">
+<h4>A_MPI_Function<a class="headerlink" href="#a-mpi-function" title="Permalink to this heading">¶</a></h4>
+<p>All translations are executed thanks to some mappers defined within
+mappers.h using an underlying hash table mechanism named uthash
+(<a class="reference external" href="https://troydhanson.github.io/uthash/">https://troydhanson.github.io/uthash/</a>) The mappers (see example below)
+always have the same syntax :</p>
+<ul class="simple">
+<li><p>mapper_name_a2r/r2a(&amp;buf, &amp;buf_tmp);</p></li>
+</ul>
+<p>In case of an a2r translation, buf_tmp represent the translation of buf
+and vice versa for an r2a translation.</p>
+<p>Exemple:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">A_MPI_Send</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="n">A_MPI_Datatype</span><span class="w"> </span><span class="n">datatype</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="n">A_MPI_Comm</span><span class="w"> </span><span class="n">comm</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">buf_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">const_buffer_conv_a2r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buf</span><span class="p">,</span><span class="o">&amp;</span><span class="n">buf_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">mapper</span><span class="o">**</span><span class="w"></span>
+<span class="w">    </span><span class="n">R_MPI_Datatype</span><span class="w"> </span><span class="n">datatype_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">datatype_conv_a2r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">datatype</span><span class="p">,</span><span class="o">&amp;</span><span class="n">datatype_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">mapper</span><span class="o">**</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">dest_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">dest_conv_a2r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dest</span><span class="p">,</span><span class="o">&amp;</span><span class="n">dest_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">mapper</span><span class="o">**</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">tag_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">tag_conv_a2r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tag</span><span class="p">,</span><span class="o">&amp;</span><span class="n">tag_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">mapper</span><span class="o">**</span><span class="w"></span>
+<span class="w">    </span><span class="n">R_MPI_Comm</span><span class="w"> </span><span class="n">comm_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">comm_conv_a2r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">comm</span><span class="p">,</span><span class="o">&amp;</span><span class="n">comm_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">mapper</span><span class="o">**</span><span class="w"></span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret_tmp</span><span class="o">=</span><span class="w"> </span><span class="n">LOCAL_MPI_Send</span><span class="p">(</span><span class="w"> </span><span class="n">buf_tmp</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="n">datatype_tmp</span><span class="p">,</span><span class="w"> </span><span class="n">dest_tmp</span><span class="p">,</span><span class="w"> </span><span class="n">tag_tmp</span><span class="p">,</span><span class="w"> </span><span class="n">comm_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">Runtime</span><span class="w"> </span><span class="n">MPI_Send</span><span class="w"> </span><span class="n">call</span><span class="o">**</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">error_code_conv_r2a</span><span class="p">(</span><span class="n">ret_tmp</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="r-mpi-function">
+<h4>R_MPI_Function<a class="headerlink" href="#r-mpi-function" title="Permalink to this heading">¶</a></h4>
+<p>R_MPI_Function, the arguments are directly passed to the MPI runtime
+call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">R_MPI_Send</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="n">R_MPI_Datatype</span><span class="w"> </span><span class="n">datatype</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="n">R_MPI_Comm</span><span class="w"> </span><span class="n">comm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret_tmp</span><span class="o">=</span><span class="w"> </span><span class="n">LOCAL_MPI_Send</span><span class="p">(</span><span class="w"> </span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w"> </span><span class="n">datatype</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ret_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="hash-table">
+<h4>Hash table<a class="headerlink" href="#hash-table" title="Permalink to this heading">¶</a></h4>
+<p>The underlying hashtable mechanism presented earlier are contained in
+the new_utils.*, new_utils_fn.* and utash.h. For each MPI objects,
+two tables are created. One for the constants, and one for the MPI_Type
+created bby the application.</p>
+<p>The differents type being:</p>
+<ul class="simple">
+<li><p>MPI_Comm</p></li>
+<li><p>MPI_Datatype</p></li>
+<li><p>MPI_Errhandler</p></li>
+<li><p>MPI_Group</p></li>
+<li><p>MPI_Op</p></li>
+<li><p>MPI_Request <strong>Séparé en 2 tables, afin de dissocier les requêtes
+persistantes des requêtes non-bloquantes</strong></p></li>
+<li><p>MPI_File</p></li>
+</ul>
+<p>The table within new_utils_fn.* contain the following translation:</p>
+<ul class="simple">
+<li><p>MPI_Handler_function</p></li>
+<li><p>MPI_Comm_copy_attr_function</p></li>
+<li><p>MPI_Comm_delete_function</p></li>
+<li><p>MPI_Type_delete_function</p></li>
+<li><p>MPI_Comm_errhandler_function</p></li>
+<li><p>MPI_File_errhandler_function</p></li>
+</ul>
+</section>
+<section id="thread-safety">
+<h4>Thread safety<a class="headerlink" href="#thread-safety" title="Permalink to this heading">¶</a></h4>
+<p>To make WI4MPI usable in a multithread environment, the in_w (see above) variable is TLS protected.</p>
+<ul class="simple">
+<li><p>__thread int in_w=0; (test_wrapper_generation.c:118)</p></li>
+<li><p>extern __thread int in_w; (wrapper.c:7)</p></li>
+<li><p>extern __thread int in_w; (c2f_f2c.c:6) || (c2f_f2c.c:1149)</p></li>
+</ul>
+<p>The table are spinlock protected. (cf :thread_safety.h):</p>
+<ul class="simple">
+<li><p>#define lock_dest(a) pthread_spin_destroy(a)</p></li>
+<li><p>#define lock_init(a) pthread_spin_init(a,PTHREAD_PROCESS_PRIVATE)</p></li>
+<li><p>#define lock(a) pthread_spin_lock(a)</p></li>
+<li><p>#define unlock(a) pthread_spin_unlock(a)</p></li>
+<li><p>typedef pthread_spinlock_t (*)table_lock_t;</p></li>
+</ul>
+</section>
+</section>
+<section id="interface">
+<h3>Interface<a class="headerlink" href="#interface" title="Permalink to this heading">¶</a></h3>
+<p>The interface version of WI4MPI propose the promise as the preload
+version (one compilation, several run over different MPI
+implementation), but this time WI4MPI had to be seen as a fully MPI
+Library. All the previously section are still relevent for the
+interface, the only things that changed is the new level name INTERFACE
+(see the schema below). This level has to be considered as a “libmpi.so”
+which is linked to the user application.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>           <span class="n">dlopen</span><span class="o">|----------|</span>  <span class="n">dlopen</span>       <span class="o">|---------|</span>
+                <span class="o">/|</span> <span class="n">Lib_OMPI</span> <span class="o">|</span> <span class="o">-----------</span> <span class="o">&gt;</span> <span class="o">|</span> <span class="n">OpenMPI</span> <span class="o">|</span>
+               <span class="o">/</span> <span class="o">|----------|</span>               <span class="o">|---------|</span>
+<span class="o">|-----------|</span> <span class="o">/</span>
+<span class="o">|</span>           <span class="o">|/</span>
+<span class="o">|</span> <span class="n">INTERFACE</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">libmpi</span><span class="o">.</span><span class="n">so</span> <span class="o">|</span>\
+<span class="o">|-----------|</span> \
+               \
+                \<span class="o">|----------|</span>  <span class="n">dlopen</span>       <span class="o">|----------|</span>
+                 <span class="o">|</span> <span class="n">Lib_IMPI</span> <span class="o">|</span> <span class="o">-----------</span> <span class="o">&gt;</span> <span class="o">|</span> <span class="n">IntelMPI</span> <span class="o">|</span>
+           <span class="n">dlopen</span><span class="o">|----------|</span>               <span class="o">|----------|</span>
+</pre></div>
+</div>
+<p>The files interface_test.c and interface_fort.c, deal with the
+overload symbol mechanism see earlier for respectively the C and Fortran
+API, then according the conversion a dlopen is made to the appropriate
+library (WI4MPI_WRAPPER_LIB) responsible for the traduction (ASM code
+chooser + A_MPI_Function + R_MPI_Function).</p>
+<p>MPI_Init example</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">MPI_Init</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="kt">char</span><span class="w"> </span><span class="o">***</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span><span class="w"></span>
+<span class="cp">#define MPI_Init PMPI_Init</span>
+<span class="cp">#pragma weak MPI_Init=PMPI_Init</span>
+<span class="kt">int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">INTERFACE_LOCAL_MPI_Init</span><span class="p">)(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="kt">char</span><span class="w"> </span><span class="o">***</span><span class="p">);</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">PMPI_Init</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="kt">char</span><span class="w"> </span><span class="o">***</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="kt">int</span><span class="w"> </span><span class="n">ret_tmp</span><span class="o">=</span><span class="w"> </span><span class="n">INTERFACE_LOCAL_MPI_Init</span><span class="p">(</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span><span class="w"></span>
+<span class="k">return</span><span class="w"> </span><span class="n">ret_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="n">__attribute__</span><span class="p">((</span><span class="n">constructor</span><span class="p">))</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="n">wrapper_interface</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">interface_handle</span><span class="o">=</span><span class="n">dlopen</span><span class="p">(</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;WI4MPI_WRAPPER_LIB&quot;</span><span class="p">),</span><span class="n">RTLD_NOW</span><span class="o">|</span><span class="n">RTLD_GLOBAL</span><span class="p">);</span><span class="w"></span>
+<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">interface_handle</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;no true IC lib defined</span><span class="se">\n</span><span class="s">error :%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">dlerror</span><span class="p">());</span><span class="w"></span>
+<span class="w">    </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="n">INTERFACE_LOCAL_MPI_Init</span><span class="o">=</span><span class="n">dlsym</span><span class="p">(</span><span class="n">interface_handle</span><span class="p">,</span><span class="s">&quot;CCMPI_MPI_Init&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>#*</p>
+</section>
+<section id="static-mode">
+<h3>Static mode<a class="headerlink" href="#static-mode" title="Permalink to this heading">¶</a></h3>
+<p>The static mode builds an executable with every targets translation. To
+avoid conflicts, symbols are renamed as follow:
+INTERF2_{TARGET}_{Symbol_name}. No more dlopen is needed (cf.
+Interface), functions pointer are choosen by 2 variables:
+WI4MPI_STATIC_TARGET_TYPE_F et WI4MPI_STATIC_TARGET_TYPE. Static
+sections are controled by directives: #if(n)def WI4MPI_STATIC / #endif</p>
+<p>Common files for both version of WI4MPI:</p>
+<ul>
+<li><p>func_char_fort.*:</p>
+<blockquote>
+<div><p>Contain all Fortran MPI functions that deal with some character arguments.
+Since in Fortran a character argument always reference is len (character(len=*) :: dark_side) and since the len argument is not the same size according to the compiler (Intel/GNU &lt; 8 or GNU &gt;= 8) used,
+WI4MPI had to implement both.</p>
+<p>Example:</p>
+</div></blockquote>
+</li>
+</ul>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifdef IFORT_CALL</span>
+<span class="w">       </span><span class="kt">void</span><span class="w">  </span><span class="n">A_f_MPI_Get_processor_name</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">resultlen</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">namelen</span><span class="p">)</span><span class="w"> </span><span class="o">**</span><span class="n">The</span><span class="w"> </span><span class="n">character</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="kt">int</span><span class="o">**</span><span class="w"></span>
+<span class="cp">#elif GFORT_CALL</span>
+<span class="w">       </span><span class="kt">void</span><span class="w">  </span><span class="n">A_f_MPI_Get_processor_name</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">resultlen</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ret</span><span class="p">,</span><span class="kt">size_t</span><span class="w"> </span><span class="n">namelen</span><span class="p">)</span><span class="w"> </span><span class="o">**</span><span class="n">The</span><span class="w"> </span><span class="n">character</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="kt">size_t</span><span class="o">**</span><span class="w"></span>
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>manual_wrapper.h: Contain some manual mappers for Fortran translation</p></li>
+<li><p>mappers.h: Contain the a2r/r2a mappers for C translattion</p></li>
+<li><p>new_utils.*, new_utils_fn.*, and uthash.h: Contain all table routines</p></li>
+<li><p>thread_safety.h: Contain the spinlock protection</p></li>
+</ul>
+<p>Preload files:</p>
+<ul class="simple">
+<li><p>bin/{wi4mpi,mpirun}: see User_Guide</p></li>
+<li><p>etc/wi4mpi.cfg: see User_Guide</p></li>
+<li><p>gen:</p>
+<ul>
+<li><p>c2f_f2c.c:</p></li>
+<li><p>lib_empty.c: Empty file to create empty Libraries made to
+remplace the one from MPI use for the compilation</p></li>
+<li><p>test_generation_wrapper.c: contain all C MPI function within
+WI4MPI which deal with the translation</p></li>
+<li><p>wrapper.c: contain all the Fortran MPI function within WI4MPI
+which deal with the translation</p></li>
+</ul>
+</li>
+<li><p>header:</p>
+<ul>
+<li><p>INTEL_INTEL: app_mpi.h app_mpio.h run_mpi.h run_mpio.h
+wrapper_f.h</p></li>
+<li><p>INTEL_OMPI: app_mpi.h app_mpio.h run_mpi.h wrapper_f.h</p></li>
+<li><p>OMPI_INTEL: app_mpi.h run_mpi.h run_mpio.h wrapper_f.h</p></li>
+<li><p>OMPI_OMPI: app_mpi.h run_mpi.h wrapper_f.h</p></li>
+</ul>
+</li>
+</ul>
+<p>Interface files:</p>
+<ul class="simple">
+<li><p>gen:</p>
+<ul>
+<li><p>c2f_f2c.c:</p></li>
+<li><p>test_generation_wrapper.c: Same as the preload version</p></li>
+<li><p>wrapper.c: Same as the preload version</p></li>
+<li><p>interface_fort.c: Contain the overload symbol mechanism for
+Fortran MPI Function</p></li>
+<li><p>interface_test.c: Contain the overload symbol mechanism for C MPI
+Function and rerooting to CodeChooser</p></li>
+</ul>
+</li>
+<li><p>header:</p>
+<ul>
+<li><p>OMPI_INTEL: app_mpi.h run_mpi.h run_mpio.h wrapper_f.h</p></li>
+<li><p>OMPI_OMPI: pp_mpi.h run_mpi.h wrapper_f.h</p></li>
+</ul>
+</li>
+<li><p>lib_cccmpi:</p>
+<ul>
+<li><p>bin: Contain all mpi wrapper for compilation</p></li>
+<li><p>include: Contain all include exposed to users</p></li>
+</ul>
+</li>
+<li><p>manual:</p>
+<ul>
+<li><p>dlsym_global.c : Get runtime MPI constantes</p></li>
+</ul>
+</li>
+<li><p>module: Contain all elements to create a descent module</p></li>
+</ul>
+</section>
+</section>
+<section id="get-involved-in-wi4mpi">
+<h2>Get involved in WI4MPI<a class="headerlink" href="#get-involved-in-wi4mpi" title="Permalink to this heading">¶</a></h2>
+<p>Generator Guide is prerequisites to this part</p>
+<section id="expand-mpi-cover-of-wi4mpi">
+<h3>Expand MPI cover of WI4MPI<a class="headerlink" href="#expand-mpi-cover-of-wi4mpi" title="Permalink to this heading">¶</a></h3>
+<section id="on-the-generator-side">
+<h4>On the generator side<a class="headerlink" href="#on-the-generator-side" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Add the function name to the func_list_….txt files</p></li>
+<li><p>Add the function description in the dictionary functions.json</p></li>
+<li><p>Add the new mappers (if needed) to convert the arguments in the
+dictionay mappers.json</p></li>
+<li><p>Get involved in the generator code if some special case have to be
+handled</p></li>
+<li><p>Generate the new Fortran header for both interface and preload
+version</p></li>
+</ul>
+</section>
+<section id="on-the-library-side">
+<h4>On the library side<a class="headerlink" href="#on-the-library-side" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Code the new mappers in mappers.h, new_utils*</p></li>
+<li><p>Update app_mpi.h app_mpio.h run_mpi.h run_mpio.h for all
+conversion of both version</p></li>
+<li><p>Update headers within src/interface/lib_cccmpi/include</p></li>
+<li><p>Make sure to respect the MPI norme</p></li>
+</ul>
+</section>
+</section>
+<section id="expand-wi4mpi-conversion-capability">
+<h3>Expand WI4MPI conversion capability<a class="headerlink" href="#expand-wi4mpi-conversion-capability" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>In mappers.h, you have to make sure that the status mapper translate
+the MPI_Status.count in the right way since its implementation is
+developer dependent.</p></li>
+<li><p>Generate the associated app_mpi.h and run_mpi.h to new conversion</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generator_guide.html" class="btn btn-neutral float-right" title="Generator Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016-2022, CEA - Commissariat de l&#39;Énerge Atomique.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

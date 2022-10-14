@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator Guide &mdash; Wi4MPI  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/logo-square-blue.svg"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Developer Guide" href="developer_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/logo-full-white.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide.html">Developer Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Generator Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-the-generators">Introduction to the generators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generation-template">Generation template</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-and-mappers-dictionaries">Function and mappers dictionaries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#functions-json-c">functions.json – C</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mappers-json-c">mappers.json – C</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functions-json-fortran-special-case">functions.json – Fortran special case</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mappers-json-fortran-special-cases">mappers.json – Fortran special cases</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#frozen-api">Frozen API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-generation">Quick generation</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Wi4MPI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Generator Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/generator_guide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="generator-guide">
+<h1>Generator Guide<a class="headerlink" href="#generator-guide" title="Permalink to this heading">¶</a></h1>
+<section id="introduction-to-the-generators">
+<h2>Introduction to the generators<a class="headerlink" href="#introduction-to-the-generators" title="Permalink to this heading">¶</a></h2>
+<p>The main generator within WI4MPI is responsible of the MPI functions generation used to pass the appropriate arguments to the underlying runtime MPI function. It handle the generation of MPI C and Fortran routines for the interface and preload version of WI4MPI, performed by both python script generator.py (which contain the class) and generate.py (which contain the generation pattern).</p>
+<p>Since all Fortran MPI object are constant or int type, most of the traduction from an MPI implementation to another one are handle by some switch case statements, which can then be easily generated. To do so, there is generated_header_f.py which generate the fortran header file for each available conversion.</p>
+<p>The last generator was made for handling c2f/f2c function. Since the underlying translation system is under a rework mechanism, any use of this generator would lead to some deprecated file.</p>
+<p>Some functions are not implemented yet due to their complexity, but in order to have a frozen API, they have to be added to the generated files (see the section below). Those functions trigger an MPI_Abort when they are used.</p>
+<section id="generation-template">
+<h3>Generation template<a class="headerlink" href="#generation-template" title="Permalink to this heading">¶</a></h3>
+<p>File template handling C MPI routines for interface and preload version:</p>
+<ol class="arabic">
+<li><p>Non generated funtion integration</p></li>
+<li><p>Normal MPI_… declaration</p></li>
+<li><p>Function pointer to the underlying runtime MPI routine declaration</p></li>
+<li><p>ASM code chooser</p></li>
+<li><p>A_MPI_…  declaration + function construction</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Header</p></li>
+<li><p>Temporary variable assignement, and translation</p></li>
+<li><p>Call to the MPI runtime function</p></li>
+<li><p>Footer</p></li>
+<li><p>return</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>R_MPI_… declaration + function contstruction</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Header</p></li>
+<li><p>Call to the MPI runtime function</p></li>
+<li><p>Footer</p></li>
+<li><p>return</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>Attribute constructor init generation</p></li>
+</ol>
+<p>Generating function connection:</p>
+<ol class="arabic">
+<li><p>print_symbol_c</p></li>
+<li><p>print_symbol_c</p></li>
+<li><p>object_gen.generate_func_asmK_tls / generate_func_asmK_tls_updated_for_interface</p></li>
+<li><p>generate_func_c</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>header_func</p></li>
+<li><p>print_temporary_decl_c + affect_temp_conv_c</p></li>
+<li><p>print_symbol_c + affect_val_conv_c</p></li>
+<li><p>footer_func</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>generate_func_r</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>header_func</p></li>
+<li><p>print_symbol_c</p></li>
+<li><p>footer_func</p></li>
+</ol>
+</div></blockquote>
+</li>
+</ol>
+<p>The Fortran MPI routines template is quite similar. The step 6 and 4 are specific to this version.</p>
+</section>
+<section id="function-and-mappers-dictionaries">
+<h3>Function and mappers dictionaries<a class="headerlink" href="#function-and-mappers-dictionaries" title="Permalink to this heading">¶</a></h3>
+<section id="functions-json-c">
+<h4>functions.json – C<a class="headerlink" href="#functions-json-c" title="Permalink to this heading">¶</a></h4>
+<p>Example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">MPI_Init</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">***</span><span class="p">);</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="s">&quot;args&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="o">**</span><span class="mi">1</span><span class="n">st</span><span class="w"> </span><span class="n">argument</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;var&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;argc&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">name</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;arg_dep&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">dependency</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;In&quot;</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">The</span><span class="w"> </span><span class="n">argument</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">converted</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">any</span><span class="w"> </span><span class="n">call</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">underlying</span><span class="w"> </span><span class="n">MPI</span><span class="w"> </span><span class="n">runtime</span><span class="w"> </span><span class="n">call</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;int_ptr_mapper&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">name</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">mapper</span><span class="w"> </span><span class="n">corresponding</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">argument</span><span class="w"> </span><span class="p">(</span><span class="n">mappers</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">responsible</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">traslation</span><span class="p">)</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;Out&quot;</span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">**</span><span class="n">The</span><span class="w"> </span><span class="n">argument</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">converted</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">MPI</span><span class="w"> </span><span class="n">runtime</span><span class="w"> </span><span class="n">call</span><span class="o">**</span><span class="w"></span>
+
+<span class="p">},</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="o">**</span><span class="mi">2</span><span class="n">nd</span><span class="w"> </span><span class="n">argument</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;var&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;argv&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;arg_dep&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;In&quot;</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;char_ppp_converter&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">    </span><span class="s">&quot;Out&quot;</span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+
+<span class="p">],</span><span class="w"></span>
+
+<span class="w">  </span><span class="s">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;MPI_Init&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">  </span><span class="s">&quot;ret&quot;</span><span class="o">:</span><span class="w"></span>
+
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">        </span><span class="s">&quot;var&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;ret&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">        </span><span class="s">&quot;arg_dep&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">        </span><span class="s">&quot;In&quot;</span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">        </span><span class="s">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;error_converter&quot;</span><span class="p">,</span><span class="w"></span>
+
+<span class="w">        </span><span class="s">&quot;Out&quot;</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Some additional key words to deal with some special cases:</p>
+<ul class="simple">
+<li><p>if : Tell to the generating process that the argument needs to be translated only if the condition within the if statements is true.</p></li>
+<li><p>if_dep : If provided, then the generator automaticly understand that the argument tested in the “if” condition is an array, and so a boucle is generated from 0 to “if_dep” (‘if_dep’ works hand in hand with ‘if’).</p></li>
+<li><p>if_null : Same as ‘if’ keyword but dedicated to NULL constants.</p></li>
+<li><p>if_null_dep : Same as ‘if_dep’ but works with ‘if_null’</p></li>
+<li><p>if_err: Handle special case MPI_Errhandler_set.</p></li>
+<li><p>del : The argument needs to be deleted from the mechanism managing the database (hashtable)</p></li>
+<li><p>del2 : Same as ‘del’.</p></li>
+<li><p>arg_dep: Same as ‘if_dep’ but works on its own.</p></li>
+</ul>
+<p>Association keywords:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 21%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Wait &amp; Test</p></th>
+<th class="head"><p>Waitany &amp; Waitany</p></th>
+<th class="head"><p>Waitsome &amp; Testsome</p></th>
+<th class="head"><p>Waitall &amp; Testall</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>if</p></td>
+<td><p>R_MPI_SUCCESS</p></td>
+<td><p>R_MPI_SUCCESS</p></td>
+<td><p>R_MPI_SUCCESS</p></td>
+<td><p>R_MPI_SUCCESS</p></td>
+</tr>
+<tr class="row-odd"><td><p>if_dep</p></td>
+<td><p>NONE</p></td>
+<td><p>NONE</p></td>
+<td><p>(*)outcount</p></td>
+<td><p>count</p></td>
+</tr>
+<tr class="row-even"><td><p>if_null</p></td>
+<td><p>R_MPI_REQUEST_NULL</p></td>
+<td><p>R_MPI_REQUEST_NULL</p></td>
+<td><p>R_MPI_REQUEST_NULL</p></td>
+<td><p>R_MPI_REQUEST_NULL</p></td>
+</tr>
+<tr class="row-odd"><td><p>if_null_dep</p></td>
+<td><p>NONE</p></td>
+<td><p>NONE</p></td>
+<td><p>array_of_indices</p></td>
+<td><p>NONE</p></td>
+</tr>
+<tr class="row-even"><td><p>del</p></td>
+<td><p>request_ptr_delete</p></td>
+<td><p>request_array_delete</p></td>
+<td><p>request_array_delete</p></td>
+<td><p>request_array_delete</p></td>
+</tr>
+<tr class="row-odd"><td><p>del2</p></td>
+<td><p>NONE</p></td>
+<td><p>NONE</p></td>
+<td><p>NONE</p></td>
+<td><p>NONE</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="mappers-json-c">
+<h4>mappers.json – C<a class="headerlink" href="#mappers-json-c" title="Permalink to this heading">¶</a></h4>
+<p>This file contains all differents metada about mappers that needs to be called to performed any conversion.
+Each entry is corresponding to the mappers name which is referenced in the function.json “name” keywords within any arguments function. Those entries provide metadata relevent for the generator as represented bellow:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;int_ptr_mapper&quot;</span><span class="p">:</span> <span class="p">{</span>     <span class="o">**</span><span class="n">name</span><span class="o">**</span>
+
+    <span class="s2">&quot;local_alloc&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">Does</span> <span class="n">the</span> <span class="n">variable</span> <span class="n">needs</span> <span class="n">to</span> <span class="n">be</span> <span class="n">allocated</span> <span class="n">locally</span><span class="o">.</span> <span class="mi">0</span><span class="o">=</span><span class="n">no</span><span class="p">;</span> <span class="mi">1</span><span class="o">=</span><span class="n">yes</span><span class="o">**</span>
+
+    <span class="s2">&quot;a2r&quot;</span><span class="p">:</span> <span class="s2">&quot;int_ptr_conv_a2r&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">If</span> <span class="s1">&#39;in=1&#39;</span> <span class="kn">from</span> <span class="nn">functions.json</span> <span class="ow">is</span> <span class="nb">set</span><span class="p">,</span> <span class="n">then</span> <span class="n">this</span> <span class="n">function</span> <span class="n">nedds</span> <span class="n">to</span> <span class="n">be</span> <span class="n">called</span><span class="o">**</span>
+
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;int (*)&quot;</span><span class="p">,</span> <span class="o">**</span><span class="nb">type</span> <span class="n">de</span> <span class="n">l</span><span class="s1">&#39;argument**</span>
+
+    <span class="s2">&quot;r2a&quot;</span><span class="p">:</span> <span class="s2">&quot;int_ptr_conv_r2a&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">If</span> <span class="s1">&#39;out=1&#39;</span> <span class="kn">from</span> <span class="nn">functions.json</span> <span class="ow">is</span> <span class="nb">set</span><span class="p">,</span> <span class="n">then</span> <span class="n">this</span> <span class="n">function</span> <span class="n">nedds</span> <span class="n">to</span> <span class="n">be</span> <span class="n">calle</span><span class="o">**</span>
+
+    <span class="s2">&quot;no_map&quot;</span><span class="p">:</span> <span class="s2">&quot;TRUE&quot;</span> <span class="o">**</span><span class="n">The</span> <span class="n">argument</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">need</span> <span class="n">to</span> <span class="n">be</span> <span class="n">converted</span> <span class="k">if</span> <span class="s1">&#39;TRUE&#39;</span><span class="o">**</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>All relevent keywords that a mappers can contain are:</p>
+<ul class="simple">
+<li><p>no_map : indicate if the argument needs to be converted</p></li>
+<li><p>assign : indicate that the arguments simply needs a cast</p></li>
+<li><p>local_alloc : indicate that the variable needs to be allocated locally</p></li>
+<li><p>wrap : Special case where the argument ‘wrap’ is a function pointeur. (example MPI_Op_create)</p></li>
+<li><p>wrapped : ‘wrapped’ contain the function name which is called to translate the arguments of the function referenced by ‘wrap’.</p></li>
+</ul>
+<p>Example of “wrap” and “wrapped”: “wrapper_user_function”</p>
+<p>When a call to  A_MPI_Op_create(A_MPI_User_function * user_fn,int commute,A_MPI_Op * op);, the <strong>user_fn</strong> et op arguments needs to be converted</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span><span class="w"> </span><span class="nf">A_MPI_Op_create</span><span class="p">(</span><span class="n">A_MPI_User_function</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">user_fn</span><span class="p">,</span><span class="kt">int</span><span class="w"> </span><span class="n">commute</span><span class="p">,</span><span class="n">A_MPI_Op</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">op</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">in_w</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">ptr_user_func</span><span class="o">=</span><span class="p">(</span><span class="n">A_MPI_User_function</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">)</span><span class="n">user_fn</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">R_MPI_Op</span><span class="w">  </span><span class="n">op_ltmp</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">R_MPI_Op</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">op_tmp</span><span class="o">=&amp;</span><span class="n">op_ltmp</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">ret_tmp</span><span class="o">=</span><span class="w"> </span><span class="n">LOCAL_MPI_Op_create</span><span class="p">(</span><span class="w"> </span><span class="p">(</span><span class="n">R_MPI_User_function</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="n">wrapper_user_function</span><span class="p">,</span><span class="w"> </span><span class="n">commute</span><span class="p">,</span><span class="w"> </span><span class="n">op_tmp</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">op_conv_r2a</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="n">op_tmp</span><span class="p">);</span><span class="w"> </span><span class="o">**</span><span class="n">conversion</span><span class="w"> </span><span class="n">de</span><span class="w"> </span><span class="n">op</span><span class="o">**</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">in_w</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">error_code_conv_r2a</span><span class="p">(</span><span class="n">ret_tmp</span><span class="p">);</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p><strong>user_fn</strong> is a function pointer where (MPI_Datatype * ) is referenced:</p>
+<p><strong>typedef void (MPI_User_function) (void * , void * , int * , MPI_Datatype * );</strong></p>
+<p><strong>Conversion de user_fn :</strong></p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">wrapper_user_function</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">invec</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">inoutvec</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="n">R_MPI_Datatype</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">A_MPI_Datatype</span><span class="w"> </span><span class="n">datatype_tmp</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">datatype_conv_r2a</span><span class="p">(</span><span class="w"> </span><span class="o">&amp;</span><span class="n">datatype_tmp</span><span class="p">,</span><span class="n">type</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">ptr_user_func</span><span class="p">)(</span><span class="n">invec</span><span class="p">,</span><span class="w"> </span><span class="n">inoutvec</span><span class="p">,</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">datatype_tmp</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The following keywords are set for user_fn in MPI_Op_create:</p>
+<ul class="simple">
+<li><p>“wrap” : <strong>“user_fn”</strong></p></li>
+<li><p>“wrapped” : <strong>“wrapper_user_function”</strong></p></li>
+</ul>
+</section>
+<section id="functions-json-fortran-special-case">
+<h4>functions.json – Fortran special case<a class="headerlink" href="#functions-json-fortran-special-case" title="Permalink to this heading">¶</a></h4>
+<p>Some special cases are handle thanks to the “assoc” field which allow to make some bounds between the hash table and both of the following parameters.</p>
+<p>Exemple:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;assoc&quot;</span><span class="p">:[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;func&quot;</span><span class="p">:</span><span class="s2">&quot;Keyval_translation_del&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;key&quot;</span><span class="p">:</span><span class="s2">&quot;keyval_tmp&quot;</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="mappers-json-fortran-special-cases">
+<h4>mappers.json – Fortran special cases<a class="headerlink" href="#mappers-json-fortran-special-cases" title="Permalink to this heading">¶</a></h4>
+<p>The fields ‘nomap’ and ‘argdep’ got the same goal as ‘no_map’ and ‘arg_dep’ of C mappers.</p>
+</section>
+</section>
+<section id="frozen-api">
+<h3>Frozen API<a class="headerlink" href="#frozen-api" title="Permalink to this heading">¶</a></h3>
+<p>In order to get the frozen API proceed as follow:</p>
+<p>Just copy the contents of A the file into the B file:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 6%" />
+<col style="width: 48%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>A</p></td>
+<td></td>
+<td><p>B</p></td>
+</tr>
+<tr class="row-even"><td><p>interface_api_fige.c</p></td>
+<td><p>&lt;—&gt;</p></td>
+<td><p>interface/gen/test_wrapper_generation.c</p></td>
+</tr>
+<tr class="row-odd"><td><p>interface_api_fige_fortran.c</p></td>
+<td><p>&lt;—&gt;</p></td>
+<td><p>interface/gen/wrapper.c</p></td>
+</tr>
+<tr class="row-even"><td><p>interface_api_fige_fortran_interface.c</p></td>
+<td><p>&lt;—&gt;</p></td>
+<td><p>interface/gen/interface_fort.c</p></td>
+</tr>
+<tr class="row-odd"><td><p>preload_api_fige.c</p></td>
+<td><p>&lt;—&gt;</p></td>
+<td><p>preload/gen/test_wrapper_generation.c</p></td>
+</tr>
+<tr class="row-even"><td><p>preload_api_fige_fortran.c</p></td>
+<td><p>&lt;—&gt;</p></td>
+<td><p>preload/gen/wrapper.c</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="quick-generation">
+<h2>Quick generation<a class="headerlink" href="#quick-generation" title="Permalink to this heading">¶</a></h2>
+<p>python generate.py will generate the following files:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt;&gt;&gt;&gt;&gt; Generating preload/gen/test_generation_wrapper.c</span>
+<span class="go">        Done.</span>
+<span class="go">&gt;&gt;&gt;&gt;&gt; Generating preload/gen/wrapper.c</span>
+<span class="go">        Done.</span>
+<span class="go">&gt;&gt;&gt;&gt;&gt; Generating interface/gen/test_generation_wrapper.c</span>
+<span class="go">        Done.</span>
+<span class="go">&gt;&gt;&gt;&gt;&gt; Generating interface/gen/wrapper.c</span>
+<span class="go">        Done.</span>
+<span class="go">&gt;&gt;&gt;&gt;&gt; Generating interface/gen/interface_test.c</span>
+<span class="go">        Done.</span>
+<span class="go">&gt;&gt;&gt;&gt;&gt; Generating interface/gen/interface_fort.c</span>
+</pre></div>
+</div>
+<p>python generate_header_f.py will generate the following files:
+preload/header/INTEL_INTEL:
+wrapper_f.h</p>
+<p>preload/header/INTEL_OMPI:
+wrapper_f.h</p>
+<p>preload/header/OMPI_INTEL:
+wrapper_f.h</p>
+<p>preload/header/OMPI_OMPI:
+wrapper_f.h</p>
+<p>In order to generate the interface version of the fortran header please use following ‘sed’ command for generator directory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir -p interface/header/OMPI_OMPI &amp;&amp; sed -e &#39;1,18 s/mpi/a_mpi/g&#39; -e &#39;19,36 s/extern int mpi/int \*ccc_mpi/g&#39; -e &#39;19,36 s/&amp;mpi_/ccc_mpi_/g&#39; preload/header/OMPI_OMPI/wrapper_f.h &gt; interface/header/OMPI_OMPI/wrapper_f.h</span>
+
+<span class="go">mkdir -p interface/header/OMPI_INTEL &amp;&amp; sed -e &#39;19,32d&#39; -e &#39;18 r ./FORTRAN/utils/wrapper_f_h_O_I_add&#39; preload/header/OMPI_INTEL/wrapper_f.h &gt; interface/header/OMPI_INTEL/wrapper_f.h</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="developer_guide.html" class="btn btn-neutral float-left" title="Developer Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2016-2022, CEA - Commissariat de l&#39;Énerge Atomique.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
